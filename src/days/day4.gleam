@@ -2,6 +2,7 @@ import gleam/string
 import gleam/io
 import gleam/int
 import gleam/list
+import utils
 
 pub fn part1(input: String) {
   string.trim(input)
@@ -21,10 +22,13 @@ pub fn part2(input: String) {
   string.trim(input)
   |> string.split("\n")
   |> list.flat_map(fn(row) {
-    let l =
+    let row_int =
       string.split(row, " ")
-      |> list.sort(fn(a, b) { lstring.to_utf_codepoints(a) < string.to_utf_codepoints(b) })
-    case list.length(l) == list.length(list.unique(l)) {
+      |> list.map(fn(word) {
+        utils.string_to_int(word)
+        |> list.sort(int.compare)
+      })
+    case list.length(row_int) == list.length(list.unique(row_int)) {
       True -> [row]
       False -> []
     }
