@@ -1,10 +1,11 @@
 import gleam/io
 import simplifile
-
 import days/day1
 import days/day2
 import days/day3
 import days/day4
+import days/day5
+import days/day6
 
 pub fn main() {
   let day1_input_file = "./src/days/day1_input"
@@ -19,7 +20,7 @@ pub fn main() {
   io.println("  Part 1: " <> day2.part1(day2_input))
   io.println("  Part 2: " <> day2.part2(day2_input))
 
-  let day3_input = 265149
+  let day3_input = 265_149
   io.println("Day 3")
   io.println("  Part 1: " <> day3.part1(day3_input))
   io.println("  Part 2: " <> day3.part2(day3_input))
@@ -30,5 +31,15 @@ pub fn main() {
   io.println("  Part 1: " <> day4.part1(day4_input))
   io.println("  Part 2: " <> day4.part2(day4_input))
 
+  let day5_input_file = "./src/days/day5_input"
+  let assert Ok(day5_input) = simplifile.read(day5_input_file)
+  io.println("Day 5")
+  //  io.println("  Part 1: " <> day5.part1(day5_input))
+  //io.println("  Part 2: " <> day5.part2(day5_input))
 
+  let day6_input_file = "./src/days/day6_input"
+  let assert Ok(day6_input) = simplifile.read(day6_input_file)
+  io.println("Day 6")
+  io.println("  Part 1: " <> day6.part1(day6_input))
+  io.println("  Part 2: " <> day6.part2(day6_input))
 }
