@@ -1,11 +1,15 @@
 import gleam/io
 import simplifile
+
 import days/day1
 import days/day2
 import days/day3
 import days/day4
 import days/day5
 import days/day6
+import days/day7
+import days/day8
+import days/day9
 
 pub fn main() {
   let day1_input_file = "./src/days/day1_input"
@@ -42,4 +46,22 @@ pub fn main() {
   io.println("Day 6")
   io.println("  Part 1: " <> day6.part1(day6_input))
   io.println("  Part 2: " <> day6.part2(day6_input))
+
+  let day7_input_file = "./src/days/day7_input"
+  let assert Ok(day7_input) = simplifile.read(day7_input_file)
+  io.println("Day 7")
+  io.println("  Part 1: " <> day7.part1(day7_input))
+  io.println("  Part 2: " <> day7.part2(day7_input))
+
+  let day8_input_file = "./src/days/day8_input"
+  let assert Ok(day8_input) = simplifile.read(day8_input_file)
+  io.println("Day 8")
+  io.println("  Part 1: " <> day8.part1(day8_input))
+  io.println("  Part 2: " <> day8.part2(day8_input))
+  
+  let day9_input_file = "./src/days/day9_input"
+  let assert Ok(day9_input) = simplifile.read(day9_input_file)
+  io.println("Day 9")
+  io.println("  Part 1: " <> day9.part1(day9_input))
+  io.println("  Part 2: " <> day9.part2(day9_input))
 }
