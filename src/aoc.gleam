@@ -10,6 +10,7 @@ import days/day6
 import days/day7
 import days/day8
 import days/day9
+import days/day10
 
 pub fn main() {
   let day1_input_file = "./src/days/day1_input"
@@ -64,4 +65,14 @@ pub fn main() {
   io.println("Day 9")
   io.println("  Part 1: " <> day9.part1(day9_input))
   io.println("  Part 2: " <> day9.part2(day9_input))
+
+  let day10_input_file = "./src/days/day10_input"
+  let assert Ok(day10_input) = simplifile.read(day10_input_file)
+  show_result(day10.solution(day10_input))
+}
+
+pub fn show_result(result: #(String,String, String)){
+  io.println(result.0)
+  io.println("  Part 1: " <> result.1)
+  io.println("  Part 2: " <> result.2)
 }

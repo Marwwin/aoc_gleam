@@ -12,6 +12,9 @@ pub type Direction {
 pub fn sum(list: List(Int)) {
   list.fold(list, 0, fn(acc, n) { acc + n })
 }
+pub fn product(list: List(Int)) {
+  list.fold(list, 1, fn(acc, n) { acc * n })
+}
 
 pub fn string_to_int(str) {
   string.to_utf_codepoints(str)

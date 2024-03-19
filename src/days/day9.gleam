@@ -22,46 +22,50 @@ pub fn part1(input: String) {
     |> string.split("")
     |> list.map(parse_char)
 
-  walk(chars, list.new(), 0)
+  solve(chars).0
   |> int.to_string
 }
 
 pub fn part2(input: String) {
-  todo
+  let chars =
+    input
+    |> string.split("")
+    |> list.map(parse_char)
+
+  solve(chars).1
+  |> int.to_string
 }
 
-fn walk(chars: List(Char), stack: List(Char), result: Int) {
+fn solve(chars: List(Char)) {
+  walk(chars, list.new(), 0, 0)
+}
+
+fn walk(chars: List(Char), stack: List(Char), groups: Int, garbage: Int) {
   case stack, chars {
-    _, [] -> result
-    [Nothing, ..rest_s], [_, ..rest_c] -> walk(rest_c, rest_s, result)
-    [], [Start(c), ..rest_c] -> walk(rest_c, [Start(c)], result)
-    s, [Nothing, ..rest_c] -> walk(rest_c, [Nothing, ..s], result)
-    [Start(Garbage), ..rest_s], [End(Garbage), ..rest_c] ->
-      walk(rest_c, rest_s, result)
-    [Start(Garbage), ..], [_, ..rest_c] -> walk(rest_c, stack, result)
-    [Start(Group), ..rest_s], [End(Group), ..rest_c] ->
-      walk(rest_c, rest_s, result + get_level(stack))
-    [Start(_), ..], [End(_), ..rest_c] -> walk(rest_c, stack, result)
-    s, [Start(f), ..rest_c] -> walk(rest_c, [Start(f), ..s], result)
-    s, [Random(_), ..rest_c] -> walk(rest_c, s, result)
-    s, [_, ..rest_c] -> walk(rest_c, s, result)
-    s, c -> {
-      io.debug(list.first(c))
-      io.debug(s)
-      panic as "Unknown Char"
-    }
+    _, [] -> #(groups, garbage)
+    [Nothing, ..rest_stack], [_, ..rest_chars] ->
+      walk(rest_chars, rest_stack, groups, garbage)
+    _, [Nothing, ..rest_chars] ->
+      walk(rest_chars, [Nothing, ..stack], groups, garbage)
+    [Start(Garbage), ..rest_stack], [End(Garbage), ..rest_chars] ->
+      walk(rest_chars, rest_stack, groups, garbage)
+    [Start(Garbage), ..], [_, ..rest_chars] ->
+      walk(rest_chars, stack, groups, garbage + 1)
+    [Start(Group), ..rest_stack], [End(Group), ..rest_chars] ->
+      walk(rest_chars, rest_stack, groups + depth(stack), garbage)
+    _, [Start(f), ..rest_chars] ->
+      walk(rest_chars, [Start(f), ..stack], groups, garbage)
+    _, [_, ..rest_chars] -> walk(rest_chars, stack, groups, garbage)
   }
 }
 
-fn get_level(stack: List(Char)) {
-  let score =
-    list.fold(stack, 0, fn(acc, c) {
-      case c {
-        Start(Group) -> acc + 1
-        _ -> acc
-      }
-    })
-  score
+fn depth(stack: List(Char)) {
+  list.fold(stack, 0, fn(acc, c) {
+    case c {
+      Start(Group) -> acc + 1
+      _ -> acc
+    }
+  })
 }
 
 fn parse_char(char: String) -> Char {

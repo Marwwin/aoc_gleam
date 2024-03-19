@@ -1,0 +1,73 @@
+import gleam/io
+import gleam/int
+import gleam/result
+import gleam/list
+import gleam/string
+import gleam/pair
+import utils
+
+pub fn solution(input: String) {
+  let lengths =
+    string.trim(input)
+    |> string.split(",")
+  #("Day 10", part1(lengths), part2(lengths))
+}
+
+pub fn part1(input: List(String)) {
+  let result =
+    input
+    |> list.map(int.parse)
+    |> result.values
+    |> walk
+
+  let knots = result.0
+  let offset = result.1
+
+  knots
+  |> list.split(offset)
+  |> pair.second
+  |> list.split(2)
+  |> pair.first
+  |> utils.product
+  |> int.to_string
+}
+
+pub fn part2(input: List(String)) {
+  input
+  |> string.join(",")
+  |> string.to_utf_codepoints()
+  |> list.append(list.map([17,31,73,47,23], fn(n){ UtfCodepoint(n)}))
+  |> io.debug
+  ""
+}
+
+fn walk(lengths) -> #(List(Int), Int) {
+  do_walk(list.range(0, 255), 0, 0, lengths)
+}
+
+fn do_walk(knots, pos, skip, lengths) {
+  case lengths {
+    [] -> {
+      let offset = list.length(knots) - pos
+      #(knots, offset)
+    }
+    [l, ..rest] -> {
+      let n = l + skip
+      let split = list.split(knots, l)
+      let first_joined =
+        list.append(
+          pair.first(split)
+            |> list.reverse,
+          pair.second(split),
+        )
+      let second_split = list.split(first_joined, n % 256)
+
+      do_walk(
+        list.append(second_split.1, second_split.0),
+        { pos + n } % 256,
+        skip + 1,
+        rest,
+      )
+    }
+  }
+}
