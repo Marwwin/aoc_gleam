@@ -48,19 +48,16 @@ pub fn part2(input: String) {
   let knots = result.0
   let offset = result.1
 
-    let s = list.split(knots,offset)
-    let a = list.append(s.1,s.0)
-  a
+  let s = list.split(knots, offset)
+  list.append(s.1, s.0)
   |> list.sized_chunk(16)
   |> list.map(fn(chunk) {
-    let split = list.split(chunk, 1)
-    let start = result.unwrap(list.at(split.0, 0), 0)
-    list.fold(split.1, start, fn(acc, e) { int.bitwise_exclusive_or(acc, e) })
+    list.fold(chunk, 0, fn(acc, e) { int.bitwise_exclusive_or(acc, e) })
   })
   |> list.map(int.to_base16)
+  |> list.map(fn(n) { string.pad_left(n, 2, "0") })
   |> string.join("")
   |> string.lowercase
-  |> io.debug
 }
 
 fn walk(lengths) -> #(List(Int), Int) {
