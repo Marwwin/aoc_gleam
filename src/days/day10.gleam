@@ -7,15 +7,13 @@ import gleam/pair
 import utils
 
 pub fn solution(input: String) {
-  let lengths =
-    string.trim(input)
-    |> string.split(",")
-  #("Day 10", part1(lengths), part2(lengths))
+  #("Day 10", part1(input), part2(input))
 }
 
-pub fn part1(input: List(String)) {
+pub fn part1(input: String) {
   let result =
-    input
+    string.trim(input)
+    |> string.split(",")
     |> list.map(int.parse)
     |> result.values
     |> walk
@@ -32,13 +30,37 @@ pub fn part1(input: List(String)) {
   |> int.to_string
 }
 
-pub fn part2(input: List(String)) {
-  input
-  |> string.join(",")
-  |> string.to_utf_codepoints()
-  |> list.append(list.map([17,31,73,47,23], fn(n){ UtfCodepoint(n)}))
+pub fn part2(input: String) {
+  let result =
+    string.trim(input)
+    |> string.split(",")
+    |> string.join(",")
+    |> string.to_utf_codepoints()
+    |> list.append(
+      list.map([17, 31, 73, 47, 23], fn(n) { string.utf_codepoint(n) })
+      |> result.values(),
+    )
+    |> list.map(string.utf_codepoint_to_int)
+    |> list.repeat(64)
+    |> list.flatten
+    |> walk
+
+  let knots = result.0
+  let offset = result.1
+
+    let s = list.split(knots,offset)
+    let a = list.append(s.1,s.0)
+  a
+  |> list.sized_chunk(16)
+  |> list.map(fn(chunk) {
+    let split = list.split(chunk, 1)
+    let start = result.unwrap(list.at(split.0, 0), 0)
+    list.fold(split.1, start, fn(acc, e) { int.bitwise_exclusive_or(acc, e) })
+  })
+  |> list.map(int.to_base16)
+  |> string.join("")
+  |> string.lowercase
   |> io.debug
-  ""
 }
 
 fn walk(lengths) -> #(List(Int), Int) {
