@@ -11,6 +11,7 @@ import days/day7
 import days/day8
 import days/day9
 import days/day10
+import days/day11
 
 pub fn main() {
   let day1_input_file = "./src/days/day1_input"
@@ -69,6 +70,10 @@ pub fn main() {
   let day10_input_file = "./src/days/day10_input"
   let assert Ok(day10_input) = simplifile.read(day10_input_file)
   show_result(day10.solution(day10_input))
+
+  let day11_input_file = "./src/days/day11_input"
+  let assert Ok(day11_input) = simplifile.read(day11_input_file)
+  show_result(day11.solution(day11_input))
 }
 
 pub fn show_result(result: #(String,String, String)){
