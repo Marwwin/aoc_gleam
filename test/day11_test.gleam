@@ -1,6 +1,4 @@
 import gleeunit
-import gleeunit/should
-import days/day11
 
 pub fn main() {
   gleeunit.main()

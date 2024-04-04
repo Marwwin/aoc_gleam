@@ -1,6 +1,5 @@
 import gleeunit
 import gleeunit/should
-import gleam/io
 import gleam/list
 import utils
 import point.{Point}

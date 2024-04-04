@@ -11,22 +11,7 @@ type Program {
   Empty
 }
 
-pub fn part1(input: String) -> String {
-  let db =
-    input
-    |> parse
-    |> create_db
-
-  let keys = set.from_list(dict.keys(db))
-  let children = get_children(db)
-
-  set.difference(keys, children)
-  |> set.to_list
-  |> list.first
-  |> result.unwrap("")
-}
-
-pub fn part2(input: String) -> String {
+pub fn solution(input) {
   let db =
     input
     |> parse
@@ -40,17 +25,42 @@ pub fn part2(input: String) -> String {
     |> set.to_list
     |> list.first
     |> result.unwrap("")
+  #("Day 7", root, part2(db, root))
+}
 
+fn part2(db, root) -> String {
+  walk(db, [root])
   ""
 }
 
-//fn walk(db: Dict(String, Program), node: String) {
-//  case dict.get(db, node) {
-//    Ok(Program(name, weight, children)) -> 
-//    Ok(Empty) -> []
-//    Error(_) -> []
-//  }
-//}
+fn walk(db: Dict(String, Program), stack) {
+  case stack {
+    [] -> []
+    [node, ..rest] -> {
+      case dict.get(db, node) {
+        Ok(Program(name, _, children)) -> {
+          io.debug(name)
+          print_weights(db, children)
+          let n_stack = list.append(children, rest)
+          walk(db, n_stack)
+        }
+        Ok(Empty) -> []
+        Error(_) -> []
+      }
+    }
+  }
+}
+
+fn print_weights(db, children) {
+  case children {
+    [] -> ""
+    [c, ..rest] -> {
+      let assert Ok(Program(name, weight, _)) = dict.get(db, c)
+      io.println(" " <> name <> " " <> int.to_string(weight))
+      print_weights(db, rest)
+    }
+  }
+}
 
 fn parse(input: String) {
   input

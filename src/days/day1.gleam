@@ -2,7 +2,6 @@ import gleam/string
 import gleam/int
 import gleam/result
 import gleam/list
-import gleam/io
 
 pub fn part1(input: String) -> String {
   let assert Ok(last) = string.first(input)

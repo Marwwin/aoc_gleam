@@ -1,6 +1,5 @@
 import gleam/dict
 import gleam/list
-import gleam/io
 import point.{type Point, Point}
 
 pub type Matrix =

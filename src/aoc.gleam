@@ -1,11 +1,10 @@
 import gleam/io
 import simplifile
-
 import days/day1
 import days/day2
 import days/day3
 import days/day4
-import days/day5
+// import days/day5
 import days/day6
 import days/day7
 import days/day8
@@ -13,6 +12,7 @@ import days/day9
 import days/day10
 import days/day11
 import days/day12
+import days/day13
 
 pub fn main() {
   let day1_input_file = "./src/days/day1_input"
@@ -38,9 +38,9 @@ pub fn main() {
   io.println("  Part 1: " <> day4.part1(day4_input))
   io.println("  Part 2: " <> day4.part2(day4_input))
 
-  let day5_input_file = "./src/days/day5_input"
-  let assert Ok(day5_input) = simplifile.read(day5_input_file)
-  io.println("Day 5")
+  // let day5_input_file = "./src/days/day5_input"
+  // let assert Ok(day5_input) = simplifile.read(day5_input_file)
+  // io.println("Day 5")
   //  io.println("  Part 1: " <> day5.part1(day5_input))
   //io.println("  Part 2: " <> day5.part2(day5_input))
 
@@ -52,16 +52,14 @@ pub fn main() {
 
   let day7_input_file = "./src/days/day7_input"
   let assert Ok(day7_input) = simplifile.read(day7_input_file)
-  io.println("Day 7")
-  io.println("  Part 1: " <> day7.part1(day7_input))
-  io.println("  Part 2: " <> day7.part2(day7_input))
+  show_result(day7.solution(day7_input))
 
   let day8_input_file = "./src/days/day8_input"
   let assert Ok(day8_input) = simplifile.read(day8_input_file)
   io.println("Day 8")
   io.println("  Part 1: " <> day8.part1(day8_input))
   io.println("  Part 2: " <> day8.part2(day8_input))
-  
+
   let day9_input_file = "./src/days/day9_input"
   let assert Ok(day9_input) = simplifile.read(day9_input_file)
   io.println("Day 9")
@@ -79,9 +77,13 @@ pub fn main() {
   let day12_input_file = "./src/days/day12_input"
   let assert Ok(day12_input) = simplifile.read(day12_input_file)
   show_result(day12.solution(day12_input))
+
+  let day13_input_file = "./src/days/day13_input"
+  let assert Ok(day13_input) = simplifile.read(day13_input_file)
+  show_result(day13.solution(day13_input))
 }
 
-pub fn show_result(result: #(String,String, String)){
+pub fn show_result(result: #(String, String, String)) {
   io.println(result.0)
   io.println("  Part 1: " <> result.1)
   io.println("  Part 2: " <> result.2)

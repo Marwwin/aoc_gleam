@@ -1,5 +1,4 @@
 import gleam/string
-import gleam/io
 import gleam/int
 import gleam/list
 import utils

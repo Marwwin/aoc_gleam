@@ -1,6 +1,5 @@
 import gleam/list
 import gleam/string
-import gleam/int
 
 pub type Direction {
   Up

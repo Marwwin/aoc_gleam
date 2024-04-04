@@ -1,5 +1,4 @@
 import gleam/int
-import utils
 import direction.{type Direction, Down, Left, Right, Up}
 
 pub type Point {

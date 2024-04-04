@@ -1,10 +1,8 @@
-import gleam/io
 import gleam/dict.{type Dict}
 import gleam/string
 import gleam/int
 import gleam/list
 import gleam/result
-import gleam/set.{type Set}
 
 pub fn part1(input: String) {
   string.trim(input)
@@ -30,7 +28,7 @@ pub fn part2(input: String) {
 
 fn walk(bank: List(Int), visited: Dict(List(Int), Int), cycles: Int) {
   case dict.get(visited, bank) {
-    Ok(v) -> cycles
+    Ok(_) -> cycles
     _ -> {
       let visited = dict.insert(visited, bank, 1)
       let max = list.fold(bank, 0, int.max)
@@ -95,6 +93,3 @@ fn walk2(bank: List(Int), visited: Dict(List(Int), Int), cycles: Int) {
   }
 }
 
-fn add(block: Int, n: Int) {
-  block + n
-}

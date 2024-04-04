@@ -1,6 +1,3 @@
-import gleam/option.{type Option, None, Some}
-import gleam/list
-
 pub type Node(t) {
   BinaryNode(value: t, left: Node(t), right: Node(t))
   PartialLeftNode(value: t, left: Node(t))
