@@ -25,24 +25,35 @@ pub fn solution(input) {
     |> set.to_list
     |> list.first
     |> result.unwrap("")
-  #("Day 7", root, part2(db, root))
+  #("Day 7", root, root)
+  //#("Day 7", root, part2(db, root))
 }
 
 fn part2(db, root) -> String {
-  walk(db, [root])
+  walk(db, [root], dict.new())
   ""
 }
 
-fn walk(db: Dict(String, Program), stack) {
+fn walk(db: Dict(String, Program), stack, weights: Dict(String, Int)) {
   case stack {
     [] -> []
     [node, ..rest] -> {
       case dict.get(db, node) {
-        Ok(Program(name, _, children)) -> {
-          io.debug(name)
-          print_weights(db, children)
+        Ok(Program(name, weight, children)) -> {
+          let children_weight = count_children(db, children, dict.new())
+          let sum = count_children(db, children, dict.new())
+          let res = print_weights(db, children, [])
+          io.println("")
+          io.println(
+            name
+            <> " "
+            <> int.to_string(weight)
+            <> " Has Children "
+            <> string.join(children, ","),
+          )
+          io.debug(res)
           let n_stack = list.append(children, rest)
-          walk(db, n_stack)
+          walk(db, n_stack, weights)
         }
         Ok(Empty) -> []
         Error(_) -> []
@@ -51,13 +62,24 @@ fn walk(db: Dict(String, Program), stack) {
   }
 }
 
-fn print_weights(db, children) {
+fn count_children(db, children, weights) {
   case children {
-    [] -> ""
+    [] -> []
+    [cg, ..rest] ->
+      case dict.get(weights, cg) {
+        Ok(w) -> w
+        Error(_) -> panic("Buu")
+      }
+  }
+}
+
+fn print_weights(db, children, res) {
+  case children {
+    [] -> res
     [c, ..rest] -> {
       let assert Ok(Program(name, weight, _)) = dict.get(db, c)
-      io.println(" " <> name <> " " <> int.to_string(weight))
-      print_weights(db, rest)
+      //io.println(" " <> name <> " " <> int.to_string(weight))
+      print_weights(db, rest, [#(name, weight), ..res])
     }
   }
 }

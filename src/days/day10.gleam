@@ -1,4 +1,5 @@
 import gleam/int
+import gleam/io
 import gleam/result
 import gleam/list
 import gleam/string
@@ -32,8 +33,6 @@ pub fn part1(input: String) {
 pub fn part2(input: String) {
   let result =
     string.trim(input)
-    |> string.split(",")
-    |> string.join(",")
     |> string.to_utf_codepoints()
     |> list.append(
       list.map([17, 31, 73, 47, 23], fn(n) { string.utf_codepoint(n) })
@@ -59,7 +58,11 @@ pub fn part2(input: String) {
   |> string.lowercase
 }
 
-fn walk(lengths) -> #(List(Int), Int) {
+pub fn knothash(lenghts) {
+  part2(lenghts)
+}
+
+pub fn walk(lengths) -> #(List(Int), Int) {
   do_walk(list.range(0, 255), 0, 0, lengths)
 }
 
