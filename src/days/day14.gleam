@@ -1,8 +1,5 @@
-import gleam/result
-import gleam/dict.{type Dict}
 import gleam/set.{type Set}
 import gleam/int
-import gleam/io
 import gleam/string
 import gleam/list
 import utils
@@ -25,7 +22,7 @@ pub fn solution(input: String) {
   #("Day14", part1(input), part2(input))
 }
 
-pub fn part1(input) {
+pub fn part1(input: List(String)) -> String {
   input
   |> list.fold(0, fn(acc, hash) { acc + count_ones(hash) })
   |> int.to_string
@@ -37,34 +34,28 @@ fn hex_to_4_bit(hex: String) -> String {
   |> utils.hex_to_bin(4)
 }
 
-fn count_ones(binary: String) {
-  let digits = string.split(binary, "")
-  list.fold(digits, 0, fn(acc, digit) {
-    case digit {
+fn count_ones(binary: String) -> Int {
+  let bits = string.split(binary, "")
+  list.fold(bits, 0, fn(acc, bit) {
+    case bit {
       "1" -> acc + 1
       _ -> acc
     }
   })
 }
 
-pub fn part2(input: List(String)) {
-  let grid =
-    list.fold_right(input, [], fn(acc, row) { [row, ..acc] })
-    |> string.join("")
-    |> string.split("")
-    |> grid.from_list(_,128)
-
+pub fn part2(input: List(String)) -> String {
   let seen = set.new()
-  walk(grid, 0, seen, 0)
-  |> io.debug
-
-  io.debug(dict.size(grid.grid))
-  ""
+  list.fold_right(input, [], fn(acc, row) { [row, ..acc] })
+  |> string.join("")
+  |> string.split("")
+  |> grid.from_list(row_size)
+  |> walk(0, seen, 0)
+  |> int.to_string
 }
 
-fn walk(grid, i, seen, n_regions) {
+fn walk(grid: Grid, i: Int, seen: Set(Point), n_regions: Int) -> Int {
   let point = grid.index_to_point(grid, i)
-  io.debug(point)
   case set.contains(seen, point) {
     True -> walk(grid, i + 1, seen, n_regions)
     False ->
@@ -86,31 +77,31 @@ fn walk_region(grid, point, seen) {
   do_walk_region(grid, [point], seen)
 }
 
-fn do_walk_region(grid, stack, seen: Set(Point)) {
+fn do_walk_region(grid: Grid, stack: List(Point), seen: Set(Point)) {
   case stack {
     [] -> seen
     [p, ..rest] -> {
       let neighbours =
         grid.adjacent(grid, p)
         |> list.filter(fn(point) { point.1 == "1" })
-      let new_stack_seen = add_neighbours_to_stack(neighbours, rest, seen)
-      do_walk_region(grid, new_stack_seen.0, new_stack_seen.1)
+      let #(new_stack, new_seen) = process_neighbours(neighbours, rest, seen)
+      do_walk_region(grid, new_stack, new_seen)
     }
   }
 }
 
-fn add_neighbours_to_stack(
+fn process_neighbours(
   neighbours: List(#(Point, String)),
   stack: List(Point),
-  seen,
+  seen: Set(Point),
 ) {
   case neighbours {
     [] -> #(stack, seen)
     [#(p, _), ..rest] -> {
       case set.contains(seen, p) {
-        True -> add_neighbours_to_stack(rest, stack, seen)
+        True -> process_neighbours(rest, stack, seen)
         False -> {
-          add_neighbours_to_stack(rest, [p, ..stack], set.insert(seen, p))
+          process_neighbours(rest, [p, ..stack], set.insert(seen, p))
         }
       }
     }

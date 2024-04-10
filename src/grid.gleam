@@ -1,5 +1,3 @@
-import gleam/io
-import gleam/int
 import point.{type Point, Point}
 import gleam/list
 import gleam/dict.{type Dict}
@@ -34,7 +32,7 @@ pub fn adjacent(grid: Grid, point: Point) -> List(#(Point, String)) {
   |> list.flat_map(fn(p) {
     case at(grid, p) {
       Ok(v) -> [#(p, v)]
-      Error(e) -> []
+      Error(_) -> []
     }
   })
 }
