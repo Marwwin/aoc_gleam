@@ -16,6 +16,8 @@ import days/day13
 import days/day14
 import days/day15
 import days/day16
+import days/day17
+import days/day18
 
 pub fn main() {
   let day1_input_file = "./src/days/day1_input"
@@ -88,14 +90,22 @@ pub fn main() {
   let day14_input_file = "./src/days/day14_input"
   let assert Ok(day14_input) = simplifile.read(day14_input_file)
   show_result(day14.solution(day14_input))
-    
-  let day15_input_file = "./src/days/day15_input"
-  let assert Ok(day15_input) = simplifile.read(day15_input_file)
-  show_result(day15.solution(day15_input))
 
-  let day16_input_file = "./src/days/day16_input"
-  let assert Ok(day16_input) = simplifile.read(day16_input_file)
-  show_result(day16.solution(day16_input))
+//   let day15_input_file = "./src/days/day15_input"
+//   let assert Ok(day15_input) = simplifile.read(day15_input_file)
+//   show_result(day15.solution(day15_input))
+
+  //   let day16_input_file = "./src/days/day16_input"
+  //   let assert Ok(day16_input) = simplifile.read(day16_input_file)
+  //   show_result(day16.solution(day16_input))
+
+  let day17_input_file = "./src/days/day17_input"
+  let assert Ok(day17_input) = simplifile.read(day17_input_file)
+  show_result(day17.solution(day17_input))
+
+  let day18_input_file = "./src/days/day18_input"
+  let assert Ok(day18_input) = simplifile.read(day18_input_file)
+  show_result(day18.solution(day18_input))
 }
 
 pub fn show_result(result: #(String, String, String)) {
