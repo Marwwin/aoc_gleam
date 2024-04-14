@@ -12,16 +12,16 @@ type Registers =
   Dict(Register, Int)
 
 pub type Value {
-  Number(Int)
-  Register(Register)
+  ANumber(Int)
+  ARegister(Register)
 }
 
 pub type DuetInstructions {
   Sound(Value)
   Set(Register, Value)
-  Add(String, Value)
-  Multiply(String, Value)
-  Modulo(String, Value)
+  Add(Register, Value)
+  Multiply(Register, Value)
+  Modulo(Register, Value)
   Recover(Value)
   Jump(Value, Value)
   Empty
@@ -30,53 +30,84 @@ pub type DuetInstructions {
 pub fn solution(input: String) {
   let data = parse(input)
   io.debug(data)
+  part1(data)
+  |> io.debug
   #("Day 18", "", "")
 }
 
 fn part1(instructions: List(DuetInstructions)) {
   let registers = dict.new()
-  do_part1(instrctions, registers)
+  do_part1(0, instructions, registers, list.new())
 }
 
-fn do_part1(instructions, registers: Registers, freq: List(Int)) {
-  case instructions {
-    [Sound(v), ..rest] ->
-      do_part1(rest, registers, [sound(v, registers), ..freq])
-    [Set(a, b), ..rest] -> do_part1(rest, set(a, b, registers), freq)
-    [Add(a, b), ..rest] -> do_part1(rest, add(a, b, registers), freq)
-  }
-}
-
-fn sound(n, registers: Registers) {
-  case n {
-    Number(n) -> io.debug(n)
-    Register(r) ->
-      case dict.get(registers, r) {
-        Ok(v) -> v
-        _ -> panic("no")
+fn do_part1(i, instructions, registers: Registers, freq: List(Int)) {
+//   io.debug("")
+//   io.debug(i)
+//   io.debug(registers)
+//   io.debug(list.at(instructions, i))
+  case list.at(instructions, i) {
+    Ok(Sound(value)) ->
+      do_part1(i + 1, instructions, registers, [sound(value, registers), ..freq])
+    Ok(Set(a, b)) -> do_part1(i + 1, instructions, set(a, b, registers), freq)
+    Ok(Add(a, b)) -> do_part1(i + 1, instructions, add(a, b, registers), freq)
+    Ok(Multiply(a, b)) ->
+      do_part1(i + 1, instructions, multiply(a, b, registers), freq)
+    Ok(Modulo(a, b)) ->
+      do_part1(i + 1, instructions, modulo(a, b, registers), freq)
+    Ok(Jump(a, b)) ->
+      do_part1(i + jump(a, b, registers), instructions, registers, freq)
+    Ok(Recover(v)) -> {
+      case unwrap(v, registers), freq {
+        0, _ -> do_part1(i + 1, instructions, registers, freq)
+        _, [a, ..] -> a
+        _, _ -> panic as "hould not"
       }
-    _ -> panic("")
+    }
+    Ok(Empty) -> panic("is no")
+    Error(_) -> panic("you done goofed up")
   }
 }
 
-fn set(a, b, registers) -> Registers {
-  case b {
-    Number(n) -> dict.insert(registers, a, n)
-    Register(r) ->
-      case dict.get(registers, r) {
-        Ok(n) -> dict.insert(registers, a, n)
-        _ -> panic("shouldnot")
-      }
+fn set(reg: String, value: Value, registers: Registers) {
+  dict.insert(registers, reg, unwrap(value, registers))
+}
+
+fn unwrap(value: Value, registers: Registers) {
+  case value {
+    ANumber(n) -> n
+    ARegister(r) -> get(registers, r)
   }
 }
 
-fn add(a, b, registers) -> Registers {
-      case dict.get(registers, a) {
-                    Ok(orig) -> case b {
-                    Number(n)
-                    }
+fn get(registers: Registers, reg: Register) {
+  case dict.get(registers, reg) {
+    Ok(value) -> value
+    Error(_) -> 0
+  }
+}
 
-                    }}
+fn multiply(x: Register, y, registers: Registers) {
+  dict.insert(registers, x, get(registers, x) * unwrap(y, registers))
+}
+
+fn add(x: Register, y, registers: Registers) {
+  dict.insert(registers, x, get(registers, x) + unwrap(y, registers))
+}
+
+fn modulo(x: Register, y, registers: Registers) {
+  dict.insert(registers, x, get(registers, x) % unwrap(y, registers))
+}
+
+fn jump(x, y, registers) {
+  case unwrap(x, registers) {
+    n if n <= 0 -> 1
+    _ -> unwrap(y, registers)
+  }
+}
+
+fn sound(x: Value, registers) {
+  unwrap(x, registers)
+}
 
 fn parse(input: String) {
   input
@@ -98,7 +129,7 @@ fn parse(input: String) {
 
 fn parse_value(str) -> Value {
   case int.parse(str) {
-    Ok(n) -> Number(n)
-    Error(_) -> Register(str)
+    Ok(n) -> ANumber(n)
+    Error(_) -> ARegister(str)
   }
 }
