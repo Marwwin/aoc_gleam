@@ -9,7 +9,7 @@ type Register =
   String
 
 type Registers =
-  Dict(Register, Int)
+  Dict(Value, Int)
 
 pub type Value {
   ANumber(Int)
@@ -18,10 +18,10 @@ pub type Value {
 
 pub type DuetInstructions {
   Sound(Value)
-  Set(Register, Value)
-  Add(Register, Value)
-  Multiply(Register, Value)
-  Modulo(Register, Value)
+  Set(Value, Value)
+  Add(Value, Value)
+  Multiply(Value, Value)
+  Modulo(Value, Value)
   Recover(Value)
   Jump(Value, Value)
   Empty
@@ -41,10 +41,6 @@ fn part1(instructions: List(DuetInstructions)) {
 }
 
 fn do_part1(i, instructions, registers: Registers, freq: List(Int)) {
-//   io.debug("")
-//   io.debug(i)
-//   io.debug(registers)
-//   io.debug(list.at(instructions, i))
   case list.at(instructions, i) {
     Ok(Sound(value)) ->
       do_part1(i + 1, instructions, registers, [sound(value, registers), ..freq])
@@ -68,45 +64,43 @@ fn do_part1(i, instructions, registers: Registers, freq: List(Int)) {
   }
 }
 
-fn set(reg: String, value: Value, registers: Registers) {
-  dict.insert(registers, reg, unwrap(value, registers))
+fn sound(x: Value, registers: Registers) {
+  unwrap(x, registers)
 }
 
-fn unwrap(value: Value, registers: Registers) {
-  case value {
-    ANumber(n) -> n
-    ARegister(r) -> get(registers, r)
-  }
+fn multiply(x: Value, y, registers: Registers) {
+  dict.insert(registers, x, unwrap(x, registers) * unwrap(y, registers))
 }
 
-fn get(registers: Registers, reg: Register) {
-  case dict.get(registers, reg) {
-    Ok(value) -> value
-    Error(_) -> 0
-  }
+fn add(x: Value, y, registers: Registers) {
+  dict.insert(registers, x, unwrap(x, registers) + unwrap(y, registers))
 }
 
-fn multiply(x: Register, y, registers: Registers) {
-  dict.insert(registers, x, get(registers, x) * unwrap(y, registers))
+fn modulo(x: Value, y, registers: Registers) {
+  dict.insert(registers, x, unwrap(x, registers) % unwrap(y, registers))
 }
 
-fn add(x: Register, y, registers: Registers) {
-  dict.insert(registers, x, get(registers, x) + unwrap(y, registers))
-}
-
-fn modulo(x: Register, y, registers: Registers) {
-  dict.insert(registers, x, get(registers, x) % unwrap(y, registers))
-}
-
-fn jump(x, y, registers) {
+fn jump(x: Value, y: Value, registers) {
   case unwrap(x, registers) {
     n if n <= 0 -> 1
     _ -> unwrap(y, registers)
   }
 }
 
-fn sound(x: Value, registers) {
-  unwrap(x, registers)
+fn unwrap(value: Value, registers: Registers) {
+  case value {
+    ANumber(n) -> n
+    r -> get(r, registers)
+  }
+}
+
+fn set(reg: Value, value: Value, registers: Registers) {
+  dict.insert(registers, reg, unwrap(value, registers))
+}
+
+fn get(reg: Value, registers: Registers) {
+  dict.get(registers, reg)
+  |> result.unwrap(0)
 }
 
 fn parse(input: String) {
@@ -116,10 +110,10 @@ fn parse(input: String) {
   |> list.map(fn(instruction: String) {
     case string.split(instruction, " ") {
       ["snd", x] -> Sound(parse_value(x))
-      ["set", x, y] -> Set(x, parse_value(y))
-      ["add", x, y] -> Add(x, parse_value(y))
-      ["mul", x, y] -> Multiply(x, parse_value(y))
-      ["mod", x, y] -> Modulo(x, parse_value(y))
+      ["set", x, y] -> Set(parse_value(x), parse_value(y))
+      ["add", x, y] -> Add(parse_value(x), parse_value(y))
+      ["mul", x, y] -> Multiply(parse_value(x), parse_value(y))
+      ["mod", x, y] -> Modulo(parse_value(x), parse_value(y))
       ["jgz", x, y] -> Jump(parse_value(x), parse_value(y))
       ["rcv", x] -> Recover(parse_value(x))
       _ -> Empty
