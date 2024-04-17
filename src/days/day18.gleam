@@ -5,8 +5,9 @@ import gleam/list
 import gleam/int
 import gleam/result
 
-type Register =
-  String
+type Register {
+  Register(String)
+}
 
 type Registers =
   Dict(Value, Int)
@@ -16,7 +17,7 @@ pub type Value {
   ARegister(Register)
 }
 
-pub type DuetInstructions {
+pub type Instructions {
   Sound(Value)
   Set(Value, Value)
   Add(Value, Value)
@@ -35,7 +36,7 @@ pub fn solution(input: String) {
   #("Day 18", "", "")
 }
 
-fn part1(instructions: List(DuetInstructions)) {
+fn part1(instructions: List(Instructions)) {
   let registers = dict.new()
   do_part1(0, instructions, registers, list.new())
 }
@@ -59,9 +60,23 @@ fn do_part1(i, instructions, registers: Registers, freq: List(Int)) {
         _, _ -> panic as "hould not"
       }
     }
-    Ok(Empty) -> panic("is no")
-    Error(_) -> panic("you done goofed up")
+    Ok(Empty) -> panic as "is no"
+    Error(_) -> panic as "you done goofed up"
   }
+}
+
+fn part2(instructions: List(Instructions)) {
+  let reg_a =
+    dict.new()
+    |> dict.insert(ARegister(Register("p")), 0)
+  let reg_b =
+    dict.new()
+    |> dict.insert(ARegister(Register("p")), 1)
+  do_part2(instructions, 0, reg_a, list.new(), 0, reg_b, list.new())
+}
+
+fn do_part2(instructions, a_i, reg_a, a_event, b_i, reg_b, b_event) {
+  todo
 }
 
 fn sound(x: Value, registers: Registers) {
@@ -124,6 +139,6 @@ fn parse(input: String) {
 fn parse_value(str) -> Value {
   case int.parse(str) {
     Ok(n) -> ANumber(n)
-    Error(_) -> ARegister(str)
+    Error(_) -> Register(str)
   }
 }
