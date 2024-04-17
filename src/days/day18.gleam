@@ -5,6 +5,10 @@ import gleam/list
 import gleam/int
 import gleam/result
 
+type Program {
+  Program(reg: Registers, i: Int, in_bus: List(Int))
+}
+
 type Register {
   Register(String)
 }
@@ -14,7 +18,7 @@ type Registers =
 
 pub type Value {
   ANumber(Int)
-  ARegister(Register)
+  ARegister(String)
 }
 
 pub type Instructions {
@@ -33,29 +37,50 @@ pub fn solution(input: String) {
   io.debug(data)
   part1(data)
   |> io.debug
-  #("Day 18", "", "")
+  #("Day 18", part1(data), "")
 }
 
 fn part1(instructions: List(Instructions)) {
-  let registers = dict.new()
-  do_part1(0, instructions, registers, list.new())
+  let regs = dict.new()
+  let program = Program(reg: dict.new(), i: 0, in_bus: list.new())
+  do_part1(instructions, program)
 }
 
-fn do_part1(i, instructions, registers: Registers, freq: List(Int)) {
-  case list.at(instructions, i) {
-    Ok(Sound(value)) ->
-      do_part1(i + 1, instructions, registers, [sound(value, registers), ..freq])
-    Ok(Set(a, b)) -> do_part1(i + 1, instructions, set(a, b, registers), freq)
-    Ok(Add(a, b)) -> do_part1(i + 1, instructions, add(a, b, registers), freq)
+fn do_part1(instructions, program) {
+  todo
+}
+
+fn walk(instructions, prog: Program) {
+  case list.at(instructions, prog.i) {
+    Ok(Sound(value)) -> {
+      let bus = [sound(value, prog.reg), ..prog.in_bus]
+      do_part1(instructions, Program(..prog, i: { prog.i + 1 }, in_bus: bus))
+    }
+    Ok(Set(a, b)) ->
+      do_part1(
+        instructions,
+        Program(..prog, reg: set(a, b, prog.reg), i: { prog.i + 1 }),
+      )
+    Ok(Add(a, b)) ->
+      do_part1(
+        instructions,
+        Program(..prog, reg: add(a, b, prog.reg), i: { prog.i + 1 }),
+      )
     Ok(Multiply(a, b)) ->
-      do_part1(i + 1, instructions, multiply(a, b, registers), freq)
+      do_part1(
+        instructions,
+        Program(..prog, reg: multiply(a, b, prog.reg), i: { prog.i + 1 }),
+      )
     Ok(Modulo(a, b)) ->
-      do_part1(i + 1, instructions, modulo(a, b, registers), freq)
+      do_part1(
+        instructions,
+        Program(..prog, reg: modulo(a, b, prog.reg), i: { prog.i + 1 }),
+      )
     Ok(Jump(a, b)) ->
-      do_part1(i + jump(a, b, registers), instructions, registers, freq)
+      do_part1(instructions, Program(..prog, i: prog.i + jump(a, b, prog.reg)))
     Ok(Recover(v)) -> {
-      case unwrap(v, registers), freq {
-        0, _ -> do_part1(i + 1, instructions, registers, freq)
+      case unwrap(v, prog.reg), prog.in_bus {
+        0, _ -> do_part1(instructions, Program(..prog, i: prog.i + 1))
         _, [a, ..] -> a
         _, _ -> panic as "hould not"
       }
@@ -68,10 +93,10 @@ fn do_part1(i, instructions, registers: Registers, freq: List(Int)) {
 fn part2(instructions: List(Instructions)) {
   let reg_a =
     dict.new()
-    |> dict.insert(ARegister(Register("p")), 0)
+    |> dict.insert(ARegister("p"), 0)
   let reg_b =
     dict.new()
-    |> dict.insert(ARegister(Register("p")), 1)
+    |> dict.insert(ARegister("p"), 1)
   do_part2(instructions, 0, reg_a, list.new(), 0, reg_b, list.new())
 }
 
@@ -79,42 +104,42 @@ fn do_part2(instructions, a_i, reg_a, a_event, b_i, reg_b, b_event) {
   todo
 }
 
-fn sound(x: Value, registers: Registers) {
-  unwrap(x, registers)
+fn sound(x: Value, regs: Registers) {
+  unwrap(x, regs)
 }
 
-fn multiply(x: Value, y, registers: Registers) {
-  dict.insert(registers, x, unwrap(x, registers) * unwrap(y, registers))
+fn multiply(x: Value, y, regs: Registers) {
+  dict.insert(regs, x, unwrap(x, regs) * unwrap(y, regs))
 }
 
-fn add(x: Value, y, registers: Registers) {
-  dict.insert(registers, x, unwrap(x, registers) + unwrap(y, registers))
+fn add(x: Value, y, regs: Registers) {
+  dict.insert(regs, x, unwrap(x, regs) + unwrap(y, regs))
 }
 
-fn modulo(x: Value, y, registers: Registers) {
-  dict.insert(registers, x, unwrap(x, registers) % unwrap(y, registers))
+fn modulo(x: Value, y, regs: Registers) {
+  dict.insert(regs, x, unwrap(x, regs) % unwrap(y, regs))
 }
 
-fn jump(x: Value, y: Value, registers) {
-  case unwrap(x, registers) {
+fn jump(x: Value, y: Value, regs) {
+  case unwrap(x, regs) {
     n if n <= 0 -> 1
-    _ -> unwrap(y, registers)
+    _ -> unwrap(y, regs)
   }
 }
 
-fn unwrap(value: Value, registers: Registers) {
+fn unwrap(value: Value, regs: Registers) {
   case value {
     ANumber(n) -> n
-    r -> get(r, registers)
+    r -> get(r, regs)
   }
 }
 
-fn set(reg: Value, value: Value, registers: Registers) {
-  dict.insert(registers, reg, unwrap(value, registers))
+fn set(reg: Value, value: Value, regs: Registers) {
+  dict.insert(regs, reg, unwrap(value, regs))
 }
 
-fn get(reg: Value, registers: Registers) {
-  dict.get(registers, reg)
+fn get(reg: Value, regs: Registers) {
+  dict.get(regs, reg)
   |> result.unwrap(0)
 }
 
@@ -139,6 +164,6 @@ fn parse(input: String) {
 fn parse_value(str) -> Value {
   case int.parse(str) {
     Ok(n) -> ANumber(n)
-    Error(_) -> Register(str)
+    Error(_) -> ARegister(str)
   }
 }
