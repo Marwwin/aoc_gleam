@@ -1,146 +1,111 @@
 import gleam/string
-import gleam/dict.{type Dict}
+import gleam/dict
 import gleam/io
+import gleam/option.{type Option, None, Some}
 import gleam/list
 import gleam/int
-import gleam/result
-
-type Program {
-  Program(reg: Registers, i: Int, in_bus: List(Int))
-}
-
-type Register {
-  Register(String)
-}
-
-type Registers =
-  Dict(Value, Int)
-
-pub type Value {
-  ANumber(Int)
-  ARegister(String)
-}
-
-pub type Instructions {
-  Sound(Value)
-  Set(Value, Value)
-  Add(Value, Value)
-  Multiply(Value, Value)
-  Modulo(Value, Value)
-  Recover(Value)
-  Jump(Value, Value)
-  Empty
+import program.{
+  type Instructions, type Program, type Register, type Value, ANumber, ARegister,
+  Add, Empty, Jump, Modulo, Multiply, Program, Recover, Register, Send, Set,
 }
 
 pub fn solution(input: String) {
   let data = parse(input)
-  io.debug(data)
-  part1(data)
+  part2(data)
   |> io.debug
   #("Day 18", part1(data), "")
 }
 
 fn part1(instructions: List(Instructions)) {
-  let regs = dict.new()
-  let program = Program(reg: dict.new(), i: 0, in_bus: list.new())
+  let program = Program(memory: dict.new(), i: 0, out: list.new())
   do_part1(instructions, program)
+  |> option.unwrap(0)
+  |> int.to_string
 }
 
 fn do_part1(instructions, program) {
-  todo
+  case program.current_instruction(program, instructions) {
+    Recover(a) -> {
+      let bus = program.pop_out(program)
+      bus.1
+    }
+    _ -> {
+      do_part1(instructions, walk(instructions, program, None))
+    }
+  }
 }
 
-fn walk(instructions, prog: Program) {
+fn walk(instructions, prog: Program, queue: Option(Int)) {
   case list.at(instructions, prog.i) {
-    Ok(Sound(value)) -> {
-      let bus = [sound(value, prog.reg), ..prog.in_bus]
-      do_part1(instructions, Program(..prog, i: { prog.i + 1 }, in_bus: bus))
-    }
-    Ok(Set(a, b)) ->
-      do_part1(
-        instructions,
-        Program(..prog, reg: set(a, b, prog.reg), i: { prog.i + 1 }),
-      )
-    Ok(Add(a, b)) ->
-      do_part1(
-        instructions,
-        Program(..prog, reg: add(a, b, prog.reg), i: { prog.i + 1 }),
-      )
-    Ok(Multiply(a, b)) ->
-      do_part1(
-        instructions,
-        Program(..prog, reg: multiply(a, b, prog.reg), i: { prog.i + 1 }),
-      )
-    Ok(Modulo(a, b)) ->
-      do_part1(
-        instructions,
-        Program(..prog, reg: modulo(a, b, prog.reg), i: { prog.i + 1 }),
-      )
-    Ok(Jump(a, b)) ->
-      do_part1(instructions, Program(..prog, i: prog.i + jump(a, b, prog.reg)))
-    Ok(Recover(v)) -> {
-      case unwrap(v, prog.reg), prog.in_bus {
-        0, _ -> do_part1(instructions, Program(..prog, i: prog.i + 1))
-        _, [a, ..] -> a
-        _, _ -> panic as "hould not"
-      }
-    }
+    Ok(Send(v)) -> program.send(prog, v)
+    Ok(Set(a, b)) -> program.set(prog, a, b)
+    Ok(Add(a, b)) -> program.add(prog, a, b)
+    Ok(Multiply(a, b)) -> program.multiply(prog, a, b)
+    Ok(Modulo(a, b)) -> program.modulo(prog, a, b)
+    Ok(Jump(a, b)) -> program.jump(prog, a, b)
+    Ok(Recover(v)) -> program.recover(prog, v, queue)
     Ok(Empty) -> panic as "is no"
     Error(_) -> panic as "you done goofed up"
+        
   }
 }
 
 fn part2(instructions: List(Instructions)) {
-  let reg_a =
-    dict.new()
-    |> dict.insert(ARegister("p"), 0)
-  let reg_b =
-    dict.new()
-    |> dict.insert(ARegister("p"), 1)
-  do_part2(instructions, 0, reg_a, list.new(), 0, reg_b, list.new())
+  let prog_a =
+    program.new()
+    |> program.set(Register("p"), ANumber(0))
+  let prog_b =
+    program.new()
+    |> program.set(Register("p"), ANumber(1))
+  do_part2(instructions, prog_a, prog_b, 0)
 }
 
-fn do_part2(instructions, a_i, reg_a, a_event, b_i, reg_b, b_event) {
-  todo
-}
+fn do_part2(instructions, prog_a: Program, prog_b: Program, i) {
+  io.println("")
+  io.debug(i)
+  io.debug(prog_a)
 
-fn sound(x: Value, regs: Registers) {
-  unwrap(x, regs)
-}
+  io.debug(program.current_instruction(prog_a, instructions))
 
-fn multiply(x: Value, y, regs: Registers) {
-  dict.insert(regs, x, unwrap(x, regs) * unwrap(y, regs))
-}
+  io.debug(prog_b)
+  io.debug(program.current_instruction(prog_b, instructions))
+  io.println("")
+  case i {
+    i if i > 100000 -> prog_a
+    _ ->
+      case
+        program.current_instruction(prog_a, instructions),
+        program.current_instruction(prog_b, instructions)
+      {
+        Recover(_), Recover(_) -> prog_a
+        Recover(_), _ -> {
+          let bus = program.pop_out(prog_b)
+          do_part2(
+            instructions,
+            walk(instructions, prog_a, bus.1),
+            walk(instructions, bus.0, None),
+            i + 1,
+          )
+        }
+        _, Recover(_) -> {
+          let bus = program.pop_out(prog_a)
+          do_part2(
+            instructions,
+            walk(instructions, bus.0, None),
+            walk(instructions, prog_b, bus.1),
+            i + 1,
+          )
+        }
 
-fn add(x: Value, y, regs: Registers) {
-  dict.insert(regs, x, unwrap(x, regs) + unwrap(y, regs))
-}
-
-fn modulo(x: Value, y, regs: Registers) {
-  dict.insert(regs, x, unwrap(x, regs) % unwrap(y, regs))
-}
-
-fn jump(x: Value, y: Value, regs) {
-  case unwrap(x, regs) {
-    n if n <= 0 -> 1
-    _ -> unwrap(y, regs)
+        _, _ ->
+          do_part2(
+            instructions,
+            walk(instructions, prog_a, None),
+            walk(instructions, prog_b, None),
+            i + 1,
+          )
+      }
   }
-}
-
-fn unwrap(value: Value, regs: Registers) {
-  case value {
-    ANumber(n) -> n
-    r -> get(r, regs)
-  }
-}
-
-fn set(reg: Value, value: Value, regs: Registers) {
-  dict.insert(regs, reg, unwrap(value, regs))
-}
-
-fn get(reg: Value, regs: Registers) {
-  dict.get(regs, reg)
-  |> result.unwrap(0)
 }
 
 fn parse(input: String) {
@@ -149,13 +114,13 @@ fn parse(input: String) {
   |> string.split("\n")
   |> list.map(fn(instruction: String) {
     case string.split(instruction, " ") {
-      ["snd", x] -> Sound(parse_value(x))
-      ["set", x, y] -> Set(parse_value(x), parse_value(y))
-      ["add", x, y] -> Add(parse_value(x), parse_value(y))
-      ["mul", x, y] -> Multiply(parse_value(x), parse_value(y))
-      ["mod", x, y] -> Modulo(parse_value(x), parse_value(y))
+      ["snd", x] -> Send(Register(x))
+      ["set", x, y] -> Set(Register(x), parse_value(y))
+      ["add", x, y] -> Add(Register(x), parse_value(y))
+      ["mul", x, y] -> Multiply(Register(x), parse_value(y))
+      ["mod", x, y] -> Modulo(Register(x), parse_value(y))
       ["jgz", x, y] -> Jump(parse_value(x), parse_value(y))
-      ["rcv", x] -> Recover(parse_value(x))
+      ["rcv", x] -> Recover(Register(x))
       _ -> Empty
     }
   })
@@ -164,6 +129,6 @@ fn parse(input: String) {
 fn parse_value(str) -> Value {
   case int.parse(str) {
     Ok(n) -> ANumber(n)
-    Error(_) -> ARegister(str)
+    Error(_) -> ARegister(Register(str))
   }
 }
