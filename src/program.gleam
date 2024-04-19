@@ -8,7 +8,12 @@ import gleam/option.{type Option, None, Some}
 import gleam/queue.{type Queue}
 
 pub type Program {
-  Program(memory: Memory, i: Int, queue: Queue(Int))
+  Program(
+    memory: Memory,
+    i: Int,
+    queue: Queue(Int),
+    instructions: List(Instructions),
+  )
 }
 
 pub type Instructions {
@@ -34,76 +39,67 @@ pub type Value {
   ARegister(Register)
 }
 
-pub fn new() -> Program {
-  Program(dict.new(), 0, queue.new())
+pub fn new(instructions) -> Program {
+  Program(dict.new(), 0, queue.new(), instructions)
 }
 
-pub fn walk(instructions, prog: Program) {
-  case list.at(instructions, prog.i) {
-    Ok(Send(v)) ->
+pub fn walk(prog: Program) {
+  case current_instruction(prog) {
+    Send(v) ->
       send(prog, v)
       |> step
-    Ok(Set(a, b)) ->
+    Set(a, b) ->
       set(prog, a, b)
       |> step
-
-    Ok(Add(a, b)) ->
+    Add(a, b) ->
       add(prog, a, b)
       |> step
-
-    Ok(Multiply(a, b)) ->
+    Multiply(a, b) ->
       multiply(prog, a, b)
       |> step
-
-    Ok(Modulo(a, b)) ->
+    Modulo(a, b) ->
       modulo(prog, a, b)
       |> step
-
-    Ok(Jump(a, b)) -> jump(prog, a, b)
-    Ok(Recover(v)) -> prog
-    Ok(Empty) -> panic as "is no"
-    Error(e) -> {
-      io.debug(e)
-      io.debug(prog)
-      panic as "you goofed up"
-    }
+    Jump(a, b) -> jump(prog, a, b)
+    Recover(_) -> prog
+    Empty -> panic as "is no"
   }
 }
 
-pub fn current_instruction(program: Program, instructions) -> Instructions {
-  list.at(instructions, program.i)
+pub fn current_instruction(program: Program) -> Instructions {
+  list.at(program.instructions, program.i)
   |> result.unwrap(Empty)
 }
 
 pub fn send(p: Program, x: Value) -> Program {
-  Program(..p, queue: queue.push_back(p.queue, unwrap(p, x)))
+  Program(..p, queue: queue.push_back(p.queue, unwrap_value(p, x)))
 }
 
 pub fn multiply(p: Program, x: Register, y: Value) -> Program {
   Program(
     ..p,
-    memory: dict.insert(p.memory, x, register_at(p, x) * unwrap(p, y)),
+    memory: dict.insert(p.memory, x, register_at(p, x) * unwrap_value(p, y)),
   )
 }
 
 pub fn add(p: Program, x, y) -> Program {
   Program(
     ..p,
-    memory: dict.insert(p.memory, x, register_at(p, x) + unwrap(p, y)),
+    memory: dict.insert(p.memory, x, register_at(p, x) + unwrap_value(p, y)),
   )
 }
 
 pub fn modulo(p: Program, x, y) -> Program {
   Program(
     ..p,
-    memory: dict.insert(p.memory, x, register_at(p, x) % unwrap(p, y)),
+    memory: dict.insert(p.memory, x, register_at(p, x) % unwrap_value(p, y)),
   )
 }
 
 pub fn jump(program, x: Value, y: Value) -> Program {
-  let i = case unwrap(program, x) {
+  let i = case unwrap_value(program, x) {
     n if n <= 0 -> 1
-    _ -> unwrap(program, y)
+    _ -> unwrap_value(program, y)
   }
   Program(..program, i: program.i + i)
 }
@@ -120,10 +116,10 @@ pub fn recover(
 }
 
 pub fn set(p: Program, register: Register, value: Value) -> Program {
-  Program(..p, memory: dict.insert(p.memory, register, unwrap(p, value)))
+  Program(..p, memory: dict.insert(p.memory, register, unwrap_value(p, value)))
 }
 
-pub fn unwrap(program: Program, value: Value) -> Int {
+pub fn unwrap_value(program: Program, value: Value) -> Int {
   case value {
     ANumber(n) -> n
     ARegister(r) -> register_at(program, r)
@@ -134,6 +130,7 @@ pub fn step(program: Program) {
   Program(..program, i: program.i + 1)
 }
 
+/// Will try to access register, if not found it will return 0. 
 pub fn register_at(program: Program, register: Register) -> Int {
   dict.get(program.memory, register)
   |> result.unwrap(0)
