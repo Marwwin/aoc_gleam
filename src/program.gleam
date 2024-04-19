@@ -1,15 +1,18 @@
 import gleam/dict.{type Dict}
 import gleam/list
 import gleam/io
+import gleam/int
+import gleam/string
 import gleam/result
 import gleam/option.{type Option, None, Some}
+import gleam/queue.{type Queue}
 
 pub type Program {
-  Program(memory: Memory, i: Int, out: List(Int))
+  Program(memory: Memory, i: Int, queue: Queue(Int))
 }
 
 pub type Instructions {
-  Send(Register)
+  Send(Value)
   Set(Register, Value)
   Add(Register, Value)
   Multiply(Register, Value)
@@ -32,7 +35,39 @@ pub type Value {
 }
 
 pub fn new() -> Program {
-  Program(dict.new(), 0, list.new())
+  Program(dict.new(), 0, queue.new())
+}
+
+pub fn walk(instructions, prog: Program) {
+  case list.at(instructions, prog.i) {
+    Ok(Send(v)) ->
+      send(prog, v)
+      |> step
+    Ok(Set(a, b)) ->
+      set(prog, a, b)
+      |> step
+
+    Ok(Add(a, b)) ->
+      add(prog, a, b)
+      |> step
+
+    Ok(Multiply(a, b)) ->
+      multiply(prog, a, b)
+      |> step
+
+    Ok(Modulo(a, b)) ->
+      modulo(prog, a, b)
+      |> step
+
+    Ok(Jump(a, b)) -> jump(prog, a, b)
+    Ok(Recover(v)) -> prog
+    Ok(Empty) -> panic as "is no"
+    Error(e) -> {
+      io.debug(e)
+      io.debug(prog)
+      panic as "you goofed up"
+    }
+  }
 }
 
 pub fn current_instruction(program: Program, instructions) -> Instructions {
@@ -40,12 +75,8 @@ pub fn current_instruction(program: Program, instructions) -> Instructions {
   |> result.unwrap(Empty)
 }
 
-pub fn send(p: Program, x: Register) -> Program {
-    io.debug(x)
-    io.debug(p)
-
-  Program(..p, out: [register_at(p, x), ..p.out])
-  |> step
+pub fn send(p: Program, x: Value) -> Program {
+  Program(..p, queue: queue.push_back(p.queue, unwrap(p, x)))
 }
 
 pub fn multiply(p: Program, x: Register, y: Value) -> Program {
@@ -53,7 +84,6 @@ pub fn multiply(p: Program, x: Register, y: Value) -> Program {
     ..p,
     memory: dict.insert(p.memory, x, register_at(p, x) * unwrap(p, y)),
   )
-  |> step
 }
 
 pub fn add(p: Program, x, y) -> Program {
@@ -61,7 +91,6 @@ pub fn add(p: Program, x, y) -> Program {
     ..p,
     memory: dict.insert(p.memory, x, register_at(p, x) + unwrap(p, y)),
   )
-  |> step
 }
 
 pub fn modulo(p: Program, x, y) -> Program {
@@ -69,7 +98,6 @@ pub fn modulo(p: Program, x, y) -> Program {
     ..p,
     memory: dict.insert(p.memory, x, register_at(p, x) % unwrap(p, y)),
   )
-  |> step
 }
 
 pub fn jump(program, x: Value, y: Value) -> Program {
@@ -93,20 +121,12 @@ pub fn recover(
 
 pub fn set(p: Program, register: Register, value: Value) -> Program {
   Program(..p, memory: dict.insert(p.memory, register, unwrap(p, value)))
-  |> step
 }
 
 pub fn unwrap(program: Program, value: Value) -> Int {
   case value {
     ANumber(n) -> n
     ARegister(r) -> register_at(program, r)
-  }
-}
-
-pub fn pop_out(program: Program) {
-  case program.out {
-    [a, ..rest] -> #(Program(..program, out: rest), Some(a))
-    [] -> #(program, None)
   }
 }
 
@@ -121,4 +141,29 @@ pub fn register_at(program: Program, register: Register) -> Int {
 
 pub fn get_raw(program: Program, register: Register) -> Result(Int, Nil) {
   dict.get(program.memory, register)
+}
+
+pub fn parse(input: String) {
+  input
+  |> string.trim
+  |> string.split("\n")
+  |> list.map(fn(instruction: String) {
+    case string.split(instruction, " ") {
+      ["snd", x] -> Send(parse_value(x))
+      ["set", x, y] -> Set(Register(x), parse_value(y))
+      ["add", x, y] -> Add(Register(x), parse_value(y))
+      ["mul", x, y] -> Multiply(Register(x), parse_value(y))
+      ["mod", x, y] -> Modulo(Register(x), parse_value(y))
+      ["jgz", x, y] -> Jump(parse_value(x), parse_value(y))
+      ["rcv", x] -> Recover(Register(x))
+      _ -> Empty
+    }
+  })
+}
+
+fn parse_value(str) -> Value {
+  case int.parse(str) {
+    Ok(n) -> ANumber(n)
+    Error(_) -> ARegister(Register(str))
+  }
 }
