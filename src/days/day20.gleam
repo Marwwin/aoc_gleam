@@ -1,5 +1,5 @@
 import gleam/list
-import gleam/io
+import gleam/set
 import gleam/result
 import gleam/int
 import gleam/string
@@ -14,19 +14,17 @@ pub type Particle {
 }
 
 pub fn solution(input: String) {
-  let pased =
+  let particles =
     input
     |> string.trim
     |> string.split("\n")
-    |> list.index_map(fn(a, i) { parse(a, int.to_string(i)) })
+    |> list.index_map(parse)
 
-    print("heppp")
-  #("Day20", part1(pased), part2(pased))
+  #("Day20", part1(particles), part2(particles))
 }
 
-fn part1(data: List(Particle)) {
-    io.debug("hepppp")
-  data
+fn part1(particles: List(Particle)) {
+  particles
   |> list.filter(fn(particle) { abs(particle.acceleration) == 0 })
   |> list.sort(fn(a, b) {
     case abs(a.velocity) - abs(b.velocity) {
@@ -37,51 +35,75 @@ fn part1(data: List(Particle)) {
     }
   })
   |> list.first
-  |> result.map(fn(r) { r.id })
+  |> result.map(fn(particle) { particle.id })
   |> result.unwrap("")
 }
 
-fn part2(data: List(Particle)) {
-    io.debug("hepp")
-  count(data)
-  |> io.debug
-    "hepp"
-}
-
-fn count(data) {
-  data
-  |> list.map(apply_acceleration)
-  |> list.filter(fn(p) { is_pos(p, data) })
-}
-
-fn is_pos(p, ps) {
-  case ps {
-    [a, ..rest] if a.pos == p.pos -> False
-    [a, ..rest] if a.id == p.id -> True
-    [_, ..rest] -> is_pos(p, rest)
-    [] -> True
+fn abs(point: Points) {
+  case point {
+    Point3D(x, y, z) ->
+      int.absolute_value(x) + int.absolute_value(y) + int.absolute_value(z)
   }
 }
 
-fn apply_acceleration(p: Particle) {
-  let Particle(pos, vec, acc) = p
-  Particle(pos, add(vec, acc), vec)
+fn part2(data: List(Particle)) {
+  do_part2(data, 0)
+  |> list.length
+  |> int.to_string
 }
 
-fn add(p1: Point3D, p2: Point3D) {
-  let Point3D(x1, y1, z1) = p1
-  let Point3D(x2, y2, z2) = p2
-  Point3D(x1 + x2, y1 + y2, z1 + z2)
+fn do_part2(particles: List(Particle), i) {
+  case i {
+    n if n > 1000 -> particles
+    _ -> {
+      let duplicates = find_duplicate_positions(particles, set.new(), set.new())
+      particles
+      |> list.filter(fn(p) { !set.contains(duplicates, p.position) })
+      |> list.map(move_particle)
+      |> do_part2(i + 1)
+    }
+  }
+}
+
+fn find_duplicate_positions(particles, seen, result) {
+  case particles {
+    [] -> result
+    [Particle(_, pos, _, _), ..rest] -> {
+      case set.contains(seen, pos) {
+        True -> find_duplicate_positions(rest, seen, set.insert(result, pos))
+        False -> find_duplicate_positions(rest, set.insert(seen, pos), result)
+      }
+    }
+  }
+}
+
+fn move_particle(particle: Particle) {
+  case particle {
+    Particle(id, pos, vec, acc) -> {
+      let new_vec = add(vec, acc)
+      Particle(id, add(pos, new_vec), new_vec, acc)
+    }
+  }
+}
+
+fn add(p1: Points, p2: Points) {
+  case p1, p2 {
+    Point3D(x1, y1, z1), Point3D(x2, y2, z2) ->
+      Point3D(x1 + x2, y1 + y2, z1 + z2)
+  }
 }
 
 fn parse(str, i) {
   case string.split(str, ">, ") {
     ["p=<" <> pos, "v=<" <> vel, "a=<" <> acc] ->
       Particle(
-        id: i,
+        id: int.to_string(i),
         position: to_3d(pos),
         velocity: to_3d(vel),
-        acceleration: to_3d(acc),
+        acceleration: to_3d(
+          acc
+          |> string.drop_right(1),
+        ),
       )
     _ -> panic as "oops"
   }
@@ -101,13 +123,3 @@ fn to_3d(pos) {
     _ -> panic as "not supported"
   }
 }
-
-fn abs(p) {
-  let Point3D(x, y, z) = p
-  int.absolute_value(x) + int.absolute_value(y) + int.absolute_value(z)
-}
-// fn get_top_acceleration(particles: List(Particle), result) {
-//   case particles {
-//     [Particle(id, _, _, Point3D(x, y, z)), ..rest] -> get_top_acceleration(particles, sum)
-//   }
-// }
