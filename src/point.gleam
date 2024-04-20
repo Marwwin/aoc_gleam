@@ -17,6 +17,15 @@ pub fn move(p: Point, dir: Direction) -> Point {
     Down -> Point(p.x, p.y - 1)
   }
 }
+pub fn inverted_move(p: Point, dir: Direction) -> Point {
+  case dir {
+    Left -> Point(p.x - 1, p.y)
+    Right -> Point(p.x + 1, p.y)
+    Up -> Point(p.x, p.y - 1)
+    Down -> Point(p.x, p.y + 1)
+  }
+}
+
 
 pub fn manhattan(a: Point, b: Point) {
   int.absolute_value(b.x - a.x) + int.absolute_value(b.y - a.y)
