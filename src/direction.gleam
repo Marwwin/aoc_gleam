@@ -1,3 +1,5 @@
+import gleam/string
+
 pub type Direction {
   Up
   Left
@@ -31,5 +33,15 @@ pub fn turn(d: Direction, towards: Direction) {
         Left -> Up
       }
     _ -> panic as "Can only turn Left or Right"
+  }
+}
+
+pub fn from_string(str) {
+  case string.lowercase(str) {
+    "left" -> Left
+    "right" -> Right
+    "up" -> Up
+    "down" -> Down
+    _ -> panic as "unknown direction"
   }
 }

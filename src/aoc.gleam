@@ -24,6 +24,7 @@ import days/day21
 import days/day22
 import days/day23
 import days/day24
+import days/day25
 
 pub fn main() {
   let day1_input_file = "./src/days/day1_input"
@@ -133,9 +134,13 @@ pub fn main() {
 //   let assert Ok(day23_input) = simplifile.read(day23_input_file)
 //   show_result(day23.solution(day23_input))
 
-  let day24_input_file = "./src/days/day24_input"
-  let assert Ok(day24_input) = simplifile.read(day24_input_file)
-  show_result(day24.solution(day24_input))
+//   let day24_input_file = "./src/days/day24_input"
+//   let assert Ok(day24_input) = simplifile.read(day24_input_file)
+//   show_result(day24.solution(day24_input))
+
+  let day25_input_file = "./src/days/day25_input"
+  let assert Ok(day25_input) = simplifile.read(day25_input_file)
+  show_result(day25.solution(day25_input))
 
 
 
