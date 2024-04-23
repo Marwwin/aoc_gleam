@@ -22,6 +22,8 @@ import days/day19
 import days/day20
 import days/day21
 import days/day22
+import days/day23
+import days/day24
 
 pub fn main() {
   let day1_input_file = "./src/days/day1_input"
@@ -95,38 +97,49 @@ pub fn main() {
   let assert Ok(day14_input) = simplifile.read(day14_input_file)
   show_result(day14.solution(day14_input))
 
-//   let day15_input_file = "./src/days/day15_input"
-//   let assert Ok(day15_input) = simplifile.read(day15_input_file)
-//   show_result(day15.solution(day15_input))
+  //   let day15_input_file = "./src/days/day15_input"
+  //   let assert Ok(day15_input) = simplifile.read(day15_input_file)
+  //   show_result(day15.solution(day15_input))
 
   //   let day16_input_file = "./src/days/day16_input"
   //   let assert Ok(day16_input) = simplifile.read(day16_input_file)
   //   show_result(day16.solution(day16_input))
 
-  let day17_input_file = "./src/days/day17_input"
-  let assert Ok(day17_input) = simplifile.read(day17_input_file)
-  show_result(day17.solution(day17_input))
+//   let day17_input_file = "./src/days/day17_input"
+//   let assert Ok(day17_input) = simplifile.read(day17_input_file)
+//   show_result(day17.solution(day17_input))
+// 
+//   let day18_input_file = "./src/days/day18_input"
+//   let assert Ok(day18_input) = simplifile.read(day18_input_file)
+//   show_result(day18.solution(day18_input))
+// 
+//   let day19_input_file = "./src/days/day19_input"
+//   let assert Ok(day19_input) = simplifile.read(day19_input_file)
+//   show_result(day19.solution(day19_input))
+// 
+//   let day20_input_file = "./src/days/day20_input"
+//   let assert Ok(day20_input) = simplifile.read(day20_input_file)
+//   show_result(day20.solution(day20_input))
+// 
+//   let day21_input_file = "./src/days/day21_input"
+//   let assert Ok(day21_input) = simplifile.read(day21_input_file)
+//   show_result(day21.solution(day21_input))
+// 
+//   let day22_input_file = "./src/days/day22_input"
+//   let assert Ok(day22_input) = simplifile.read(day22_input_file)
+//   show_result(day22.solution(day22_input))
 
-  let day18_input_file = "./src/days/day18_input"
-  let assert Ok(day18_input) = simplifile.read(day18_input_file)
-  show_result(day18.solution(day18_input))
+//   let day23_input_file = "./src/days/day23_input"
+//   let assert Ok(day23_input) = simplifile.read(day23_input_file)
+//   show_result(day23.solution(day23_input))
 
-  let day19_input_file = "./src/days/day19_input"
-  let assert Ok(day19_input) = simplifile.read(day19_input_file)
-  show_result(day19.solution(day19_input))
-
-  let day20_input_file = "./src/days/day20_input"
-  let assert Ok(day20_input) = simplifile.read(day20_input_file)
-  show_result(day20.solution(day20_input))
+  let day24_input_file = "./src/days/day24_input"
+  let assert Ok(day24_input) = simplifile.read(day24_input_file)
+  show_result(day24.solution(day24_input))
 
 
-  let day21_input_file = "./src/days/day21_input"
-  let assert Ok(day21_input) = simplifile.read(day21_input_file)
-  show_result(day21.solution(day21_input))
 
-  let day22_input_file = "./src/days/day22_input"
-  let assert Ok(day22_input) = simplifile.read(day22_input_file)
-  show_result(day22.solution(day22_input))
+
 }
 
 pub fn show_result(result: #(String, String, String)) {

@@ -1,7 +1,5 @@
 import gleam/string
 import gleam/int
-import gleam/io
-import gleam/result
 import gleam/dict.{type Dict}
 import point.{type Point, Point}
 import direction.{type Direction}
@@ -30,12 +28,12 @@ pub fn solution(input: String) {
   #("Day 22", part1(grid), part2(grid))
 }
 
-fn part1(grid:Grid) {
+fn part1(grid: Grid) {
   do_part1(grid, Virus(Point(0, 0), direction.Up), 0, 0)
   |> int.to_string
 }
 
-fn do_part1(grid, virus: Virus, i, result) {
+fn do_part1(grid: Grid, virus: Virus, i: Int, result: Int) {
   case i < 10_000 {
     True -> {
       let #(new_virus, new_grid, is_infected) = virus_move_part1(virus, grid)
@@ -63,12 +61,12 @@ fn virus_move_part1(virus: Virus, grid: Grid) {
   }
 }
 
-fn part2(grid) {
+fn part2(grid: Grid) {
   do_part2(grid, Virus(Point(0, 0), direction.Up), 0, 0)
   |> int.to_string
 }
 
-fn do_part2(grid, virus: Virus, i, result) {
+fn do_part2(grid: Grid, virus: Virus, i: Int, result: Int) {
   case i < 10_000_000 {
     True -> {
       let #(new_virus, new_grid, is_infected) = virus_move_part2(virus, grid)
@@ -106,11 +104,11 @@ fn virus_move_part2(virus: Virus, grid: Grid) {
   }
 }
 
-fn parse(grid) {
+fn parse(grid: List(String)) {
   do_parse(grid, -12, 12, dict.new())
 }
 
-fn do_parse(grid: List(String), x, y, result) {
+fn do_parse(grid: List(String), x: Int, y: Int, result: Grid) {
   case grid {
     ["\n", ..rest] -> do_parse(rest, -12, y - 1, result)
     [a, ..rest] -> {
