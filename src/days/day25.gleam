@@ -36,7 +36,7 @@ pub type Instructions =
   Dict(String, Instruction)
 
 pub fn solution(input: String) {
-  let assert [begin, diagnostic, _, ..rest] =
+  let assert [_, diagnostic, _, ..rest] =
     input
     |> string.split("\n")
   let data =
@@ -66,20 +66,16 @@ pub fn solution(input: String) {
 
 fn part1(machine) -> String {
   case machine.diagnostics > machine.counter {
-    True -> next(machine)
+    True -> next_state(machine)
     False ->
       tape_state(machine)
       |> int.to_string
   }
 }
 
-fn tape_state(m: TuringMachine) {
-  list.fold(dict.to_list(m.tape), 0, fn(acc, e) { acc + e.1 })
-}
-
-fn next(m: TuringMachine) {
+fn next_state(m: TuringMachine) {
   case dict.get(m.instructions, m.state) {
-    Ok(Instruction(state, zero, one)) ->
+    Ok(Instruction(_, zero, one)) ->
       case dict.get(m.tape, m.cursor) {
         Ok(1) -> part1(do(m, one))
         Ok(0) | Error(_) -> part1(do(m, zero))
@@ -107,6 +103,11 @@ fn do(m, rule) {
   )
 }
 
+fn tape_state(m: TuringMachine) {
+  dict.to_list(m.tape)
+  |> list.fold(0, fn(acc, e) { acc + e.1 })
+}
+
 fn part2() {
   ""
 }
@@ -115,7 +116,7 @@ fn parse(strs: List(List(String))) {
   do_parse(strs, dict.new())
 }
 
-fn do_parse(strs: List(List(String)), result) {
+fn do_parse(strs: List(List(String)), result: Instructions) {
   case strs {
     [
       [
@@ -149,6 +150,11 @@ fn do_parse(strs: List(List(String)), result) {
   }
 }
 
+fn to_rule(write, dir, state) {
+  let assert Ok(w) = int.parse(write)
+  Rule(w, direction.from_string(dir), state)
+}
+
 fn parse_diagnostic(diag) {
   case diag {
     "Perform a diagnostic checksum after " <> d ->
@@ -157,9 +163,4 @@ fn parse_diagnostic(diag) {
       |> result.unwrap(0)
     _ -> panic as "unknown diagnostics str"
   }
-}
-
-fn to_rule(write, dir, state) {
-  let assert Ok(w) = int.parse(write)
-  Rule(w, direction.from_string(dir), state)
 }

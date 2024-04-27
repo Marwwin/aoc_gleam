@@ -1,10 +1,11 @@
-import gleam/list
-import gleam/set.{type Set}
-import gleam/int
-import gleam/result
-import gleam/io
-import gleam/string
 import gleam/dict.{type Dict}
+import gleam/int
+import gleam/io
+import gleam/list
+import gleam/option.{None, Some}
+import gleam/result
+import gleam/set.{type Set}
+import gleam/string
 
 type Program {
   Program(name: String, weight: Int, children: List(String))
@@ -25,13 +26,69 @@ pub fn solution(input) {
     |> set.to_list
     |> list.first
     |> result.unwrap("")
-  #("Day 7", root, root)
+  #("Day 7", root, part2(db, root))
   //#("Day 7", root, part2(db, root))
 }
 
 fn part2(db, root) -> String {
-  walk(db, [root], dict.new())
+  tree_walk(db, [root], list.new())
   ""
+}
+
+fn tree_walk(db, stack: List(String), weights: List(String)) {
+  case stack {
+    [head, ..tail] -> {
+      let children = case dict.get(db, head) {
+        Ok(Program(_, _, chs)) -> {
+          let childrens =
+            chs
+            |> list.map(fn(c) {
+              let assert Ok(p) = dict.get(db, c)
+              p
+            })
+          let off_balance =
+            childrens
+            |> list.fold(safe_get_head_weight(childrens), fn(acc, e) {
+              let assert Program(_, w, _) = e
+              int.bitwise_exclusive_or(acc, w)
+            })
+          let next =
+            childrens
+            |> list.filter(fn(c) {
+              let assert Program(_, w, _) = c
+              w == off_balance
+            })
+            |> list.map(fn(c) {
+              let assert Program(id, _, _) = c
+              id
+            })
+          io.debug(childrens)
+          io.debug(off_balance)
+          io.debug(next)
+          tree_walk(db, next, weights)
+        }
+        _ -> []
+      }
+      io.debug(head)
+      io.debug(children)
+      tree_walk(db, children, weights)
+    }
+    [] -> weights
+  }
+}
+
+fn safe_head(list) {
+  case list {
+    [head, ..] -> head
+    [] -> []
+  }
+}
+
+fn safe_get_head_weight(list) {
+  case list {
+    [Program(_, w, _), ..] -> w
+    _ -> 0
+  }
 }
 
 fn walk(db: Dict(String, Program), stack, weights: Dict(String, Int)) {

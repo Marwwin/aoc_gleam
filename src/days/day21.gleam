@@ -60,6 +60,40 @@ pub fn solution(input: String) {
 }
 
 fn part1() {
+  let sizes =
+    input
+    |> string.trim()
+    |> string.split("\n")
+    |> list.map(parse)
+  let rules =
+    dict.new()
+    |> dict.insert(
+      "Size2",
+      sizes
+        |> list.filter(fn(s) {
+          case s {
+            Size2(_, _) -> True
+            _ -> False
+          }
+        }),
+    )
+    |> dict.insert(
+      "Size3",
+      sizes
+        |> list.filter(fn(s) {
+          case s {
+            Size3(_, _) -> True
+            _ -> False
+          }
+        }),
+    )
+//     |> io.debug
+  let start_pattern = [".#.", "..#", "###"]
+  #("Day 21", part1(rules, start_pattern), part2())
+}
+
+fn part1(rules: Dict(String, List(Size)), pattern: List(String)) {
+
   ""
 }
 
