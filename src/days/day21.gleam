@@ -1,7 +1,7 @@
-//import gleam/string
-//import gleam/list
-//import gleam/io
-//import gleam/dict.{type Dict}
+import gleam/string
+import gleam/list
+import gleam/io
+import gleam/dict.{type Dict}
 //
 //pub type Size {
 //  Size2(in: List(String), out: List(String))
@@ -42,7 +42,6 @@
 //}
 //
 //fn part1(rules: Dict(String, List(Size)), pattern: List(String)) {
-import gleam/dict.{type Dict}
 
 pub type Pixel{
     Empty
@@ -56,50 +55,50 @@ pub type Pattern{
 }
 
 pub fn solution(input: String) {
-  #("Day 21", part1(), part2())
+  #("Day 21", "","")
 }
 
-fn part1() {
-  let sizes =
-    input
-    |> string.trim()
-    |> string.split("\n")
-    |> list.map(parse)
-  let rules =
-    dict.new()
-    |> dict.insert(
-      "Size2",
-      sizes
-        |> list.filter(fn(s) {
-          case s {
-            Size2(_, _) -> True
-            _ -> False
-          }
-        }),
-    )
-    |> dict.insert(
-      "Size3",
-      sizes
-        |> list.filter(fn(s) {
-          case s {
-            Size3(_, _) -> True
-            _ -> False
-          }
-        }),
-    )
+// fn part1(input) {
+//   let sizes =
+//     input
+//     |> string.trim()
+//     |> string.split("\n")
+//     |> list.map(parse)
+//   let rules =
+//     dict.new()
+//     |> dict.insert(
+//       "Size2",
+//       sizes
+//         |> list.filter(fn(s) {
+//           case s {
+//             Size2(_, _) -> True
+//             _ -> False
+//           }
+//         }),
+//     )
+//     |> dict.insert(
+//       "Size3",
+//       sizes
+//         |> list.filter(fn(s) {
+//           case s {
+//             Size3(_, _) -> True
+//             _ -> False
+//           }
+//         }),
+//     )
 //     |> io.debug
-  let start_pattern = [".#.", "..#", "###"]
-  #("Day 21", part1(rules, start_pattern), part2())
-}
-
-fn part1(rules: Dict(String, List(Size)), pattern: List(String)) {
-
-  ""
-}
-
-fn part2() {
-  ""
-}
+//   let start_pattern = [".#.", "..#", "###"]
+//   #("Day 21", part1(rules, start_pattern), part2())
+// }
+// 
+// fn part1(rules: Dict(String, List(Size)), pattern: List(String)) {
+// 
+//   ""
+// }
+// 
+// fn part2() {
+//   ""
+// }
 
 //<<<<<<< Updated upstream
 //fn parse(str) {
@@ -115,25 +114,24 @@ fn part2() {
 //  }
 //}
 //=======
-fn parse(rule, rules) {
-  let assert [input, output] = rule
-  |> string.split(" => ")
-  case string.split(input, "/"){
-    [a,b] -> Pixel2(pix(a), pix(b))
-  }
-}
+// fn parse(rule, rules) {
+//   let assert [input, output] = rule
+//   |> string.split(" => ")
+//   case string.split(input, "/"){
+//     [a,b] -> Pixel2(pix(a), pix(b))
+//   }
+// }
 
-fn pix(pixel_str){
-    string.count()
-}
-
-fn walk(pixel, rules){
-    case pixel{
-    [Pixel2(Empty,Empty)] ->
-    [Pixel2(One,Empty)] ->
-    [Pixel3(Two,Two)]->
-    [Pixel2(One,One)]->
-    [Pixel2(Two,One)]->
-    [Pixel2(Two,Two)]->
-    }
-}
+// fn pix(pixel_str){
+// }
+// 
+// fn walk(pixel, rules){
+//     case pixel{
+//     [Pixel2(Empty,Empty)] ->
+//     [Pixel2(One,Empty)] ->
+//     [Pixel3(Two,Two)]->
+//     [Pixel2(One,One)]->
+//     [Pixel2(Two,One)]->
+//     [Pixel2(Two,Two)]->
+//     }
+// }

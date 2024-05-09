@@ -1,14 +1,15 @@
+//// This is a bit of a mess but it works..
+
 import gleam/dict.{type Dict}
 import gleam/int
-import gleam/io
 import gleam/list
-import gleam/option.{None, Some}
 import gleam/result
 import gleam/set.{type Set}
 import gleam/string
 
 type Program {
   Program(name: String, weight: Int, children: List(String))
+  LeafProgram(name: String, weight: Int)
   Empty
 }
 
@@ -19,7 +20,7 @@ pub fn solution(input) {
     |> create_db
 
   let keys = set.from_list(dict.keys(db))
-  let children = get_children(db)
+  let children = get_set_of_children(db)
 
   let root =
     set.difference(keys, children)
@@ -27,117 +28,77 @@ pub fn solution(input) {
     |> list.first
     |> result.unwrap("")
   #("Day 7", root, part2(db, root))
-  //#("Day 7", root, part2(db, root))
 }
 
 fn part2(db, root) -> String {
-  tree_walk(db, [root], list.new())
+  walk(db, root, list.new())
   ""
 }
 
-fn tree_walk(db, stack: List(String), weights: List(String)) {
-  case stack {
-    [head, ..tail] -> {
-      let children = case dict.get(db, head) {
-        Ok(Program(_, _, chs)) -> {
-          let childrens =
-            chs
-            |> list.map(fn(c) {
-              let assert Ok(p) = dict.get(db, c)
-              p
-            })
-          let off_balance =
-            childrens
-            |> list.fold(safe_get_head_weight(childrens), fn(acc, e) {
-              let assert Program(_, w, _) = e
-              int.bitwise_exclusive_or(acc, w)
-            })
-          let next =
-            childrens
-            |> list.filter(fn(c) {
-              let assert Program(_, w, _) = c
-              w == off_balance
-            })
-            |> list.map(fn(c) {
-              let assert Program(id, _, _) = c
-              id
-            })
-          io.debug(childrens)
-          io.debug(off_balance)
-          io.debug(next)
-          tree_walk(db, next, weights)
-        }
-        _ -> []
-      }
-      io.debug(head)
-      io.debug(children)
-      tree_walk(db, children, weights)
+// Walk down the tree until you find a balanced tower
+// The parent holding that tower is unbalanced
+// Then walk back one step and calculate the correct weight
+fn walk(db, next, seen) {
+  let childrens = list.map(children(db, next), fn(e) { get_weight(db, e) })
+  case get_unbalanced_node(childrens) {
+    Ok(child) -> {
+      walk(db, child, [next, ..seen])
     }
-    [] -> weights
+    Error(_) -> backtrack(db, [next, ..seen])
   }
 }
 
-fn safe_head(list) {
-  case list {
-    [head, ..] -> head
-    [] -> []
+fn backtrack(db, seen: List(String)) {
+  let assert [a, b, ..] = seen
+  let unbalanced_nodes_children_weight =
+    list.fold(children(db, a), 0, fn(acc, e) { acc + get_weight(db, e).1 })
+  let siblings = list.map(children(db, b), fn(e) { get_weight(db, e) })
+  let target_weight = sibling_weight(siblings, a)
+  target_weight - unbalanced_nodes_children_weight
+}
+
+fn sibling_weight(l: List(#(String, Int)), node) {
+  case l {
+    [a, ..] if a.0 != node -> a.1
+    [_, ..rest] -> sibling_weight(rest, node)
+    _ -> panic as "oh noe"
   }
 }
 
-fn safe_get_head_weight(list) {
-  case list {
-    [Program(_, w, _), ..] -> w
-    _ -> 0
+fn get_unbalanced_node(l: List(#(String, Int))) -> Result(String, Nil) {
+  let values =
+    list.map(l, fn(e) { e.1 })
+    |> list.sort(int.compare)
+  let unique = case values {
+    [a, b, ..] if a == b ->
+      list.last(values)
+      |> result.unwrap(0)
+    [a, ..] -> a
+    _ -> panic as "get_unbalanced_node should not"
+  }
+  case list.filter(l, fn(e) { e.1 == unique }) {
+    [#(name, _)] -> Ok(name)
+    _ -> Error(Nil)
   }
 }
 
-fn walk(db: Dict(String, Program), stack, weights: Dict(String, Int)) {
-  case stack {
-    [] -> []
-    [node, ..rest] -> {
-      case dict.get(db, node) {
-        Ok(Program(name, weight, children)) -> {
-          let children_weight = count_children(db, children, dict.new())
-          let sum = count_children(db, children, dict.new())
-          let res = print_weights(db, children, [])
-          io.println("")
-          io.println(
-            name
-            <> " "
-            <> int.to_string(weight)
-            <> " Has Children "
-            <> string.join(children, ","),
-          )
-          io.debug(res)
-          let n_stack = list.append(children, rest)
-          walk(db, n_stack, weights)
-        }
-        Ok(Empty) -> []
-        Error(_) -> []
-      }
+fn get_weight(db, node) -> #(String, Int) {
+  case dict.get(db, node) {
+    Ok(LeafProgram(name, weight)) -> #(name, weight)
+    Ok(Program(name, weight, children)) -> {
+      let w =
+        weight
+        + list.fold(children, 0, fn(acc, c) { acc + get_weight(db, c).1 })
+      #(name, w)
     }
+    _ -> panic as "oops"
   }
 }
 
-fn count_children(db, children, weights) {
-  case children {
-    [] -> []
-    [cg, ..rest] ->
-      case dict.get(weights, cg) {
-        Ok(w) -> w
-        Error(_) -> panic("Buu")
-      }
-  }
-}
-
-fn print_weights(db, children, res) {
-  case children {
-    [] -> res
-    [c, ..rest] -> {
-      let assert Ok(Program(name, weight, _)) = dict.get(db, c)
-      //io.println(" " <> name <> " " <> int.to_string(weight))
-      print_weights(db, rest, [#(name, weight), ..res])
-    }
+fn children(db, node) {
+  case dict.get(db, node) {
+    Ok(Program(_, _, children)) -> children
+    _ -> []
   }
 }
 
@@ -149,7 +110,7 @@ fn parse(input: String) {
 
 fn row_to_program(row: String) {
   case string.split(row, " ") {
-    [name, weight] -> Program(name, parse_weight(weight), [])
+    [name, weight] -> LeafProgram(name, parse_weight(weight))
     [name, weight, "->", ..children] ->
       Program(name, parse_weight(weight), parse_children(children))
     _ -> Empty
@@ -175,17 +136,20 @@ fn create_db(programs: List(Program)) {
     case program {
       Program(name, weight, children) ->
         dict.insert(db, name, Program(name, weight, children))
+      LeafProgram(name, weight) ->
+        dict.insert(db, name, LeafProgram(name, weight))
       Empty -> db
     }
   })
 }
 
-fn get_children(programs: Dict(String, Program)) -> Set(String) {
+fn get_set_of_children(programs: Dict(String, Program)) -> Set(String) {
   programs
   |> dict.values
   |> list.fold(set.new(), fn(s, program) {
     case program {
       Program(_, _, children) -> set.union(s, set.from_list(children))
+      LeafProgram(_, _) -> s
       Empty -> s
     }
   })
