@@ -130,9 +130,9 @@ pub fn main() {
 //   let assert Ok(day22_input) = simplifile.read(day22_input_file)
 //   show_result(day22.solution(day22_input))
 
-//   let day23_input_file = "./src/days/day23_input"
-//   let assert Ok(day23_input) = simplifile.read(day23_input_file)
-//   show_result(day23.solution(day23_input))
+  let day23_input_file = "./src/days/day23_input"
+  let assert Ok(day23_input) = simplifile.read(day23_input_file)
+  show_result(day23.solution(day23_input))
 
 //   let day24_input_file = "./src/days/day24_input"
 //   let assert Ok(day24_input) = simplifile.read(day24_input_file)
