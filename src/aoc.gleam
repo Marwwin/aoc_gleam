@@ -27,28 +27,28 @@ import days/day24
 import days/day25
 
 pub fn main() {
-  let day1_input_file = "./src/days/day1_input"
-  let assert Ok(day1_input) = simplifile.read(day1_input_file)
-  io.println("Day 1")
-  io.println("  Part 1: " <> day1.part1(day1_input))
-  io.println("  Part 2: " <> day1.part2(day1_input))
-
-  let day2_input_file = "./src/days/day2_input"
-  let assert Ok(day2_input) = simplifile.read(day2_input_file)
-  io.println("Day 2")
-  io.println("  Part 1: " <> day2.part1(day2_input))
-  io.println("  Part 2: " <> day2.part2(day2_input))
-
-  let day3_input = 265_149
-  io.println("Day 3")
-  io.println("  Part 1: " <> day3.part1(day3_input))
-  io.println("  Part 2: " <> day3.part2(day3_input))
-
-  let day4_input_file = "./src/days/day4_input"
-  let assert Ok(day4_input) = simplifile.read(day4_input_file)
-  io.println("Day 4")
-  io.println("  Part 1: " <> day4.part1(day4_input))
-  io.println("  Part 2: " <> day4.part2(day4_input))
+//   let day1_input_file = "./src/days/day1_input"
+//   let assert Ok(day1_input) = simplifile.read(day1_input_file)
+//   io.println("Day 1")
+//   io.println("  Part 1: " <> day1.part1(day1_input))
+//   io.println("  Part 2: " <> day1.part2(day1_input))
+// 
+//   let day2_input_file = "./src/days/day2_input"
+//   let assert Ok(day2_input) = simplifile.read(day2_input_file)
+//   io.println("Day 2")
+//   io.println("  Part 1: " <> day2.part1(day2_input))
+//   io.println("  Part 2: " <> day2.part2(day2_input))
+// 
+//   let day3_input = 265_149
+//   io.println("Day 3")
+//   io.println("  Part 1: " <> day3.part1(day3_input))
+//   io.println("  Part 2: " <> day3.part2(day3_input))
+// 
+//   let day4_input_file = "./src/days/day4_input"
+//   let assert Ok(day4_input) = simplifile.read(day4_input_file)
+//   io.println("Day 4")
+//   io.println("  Part 1: " <> day4.part1(day4_input))
+//   io.println("  Part 2: " <> day4.part2(day4_input))
 
   // let day5_input_file = "./src/days/day5_input"
   // let assert Ok(day5_input) = simplifile.read(day5_input_file)
@@ -62,10 +62,10 @@ pub fn main() {
 //   io.println("  Part 1: " <> day6.part1(day6_input))
 //   io.println("  Part 2: " <> day6.part2(day6_input))
 // 
-  let day7_input_file = "./src/days/day7_input"
-  let assert Ok(day7_input) = simplifile.read(day7_input_file)
-  show_result(day7.solution(day7_input))
-// 
+//   let day7_input_file = "./src/days/day7_input"
+//   let assert Ok(day7_input) = simplifile.read(day7_input_file)
+//   show_result(day7.solution(day7_input))
+
 //   let day8_input_file = "./src/days/day8_input"
 //   let assert Ok(day8_input) = simplifile.read(day8_input_file)
 //   io.println("Day 8")
@@ -130,10 +130,10 @@ pub fn main() {
 //   let assert Ok(day22_input) = simplifile.read(day22_input_file)
 //   show_result(day22.solution(day22_input))
 
-  let day23_input_file = "./src/days/day23_input"
-  let assert Ok(day23_input) = simplifile.read(day23_input_file)
-  show_result(day23.solution(day23_input))
-
+//   let day23_input_file = "./src/days/day23_input"
+//   let assert Ok(day23_input) = simplifile.read(day23_input_file)
+//   show_result(day23.solution(day23_input))
+// 
 //   let day24_input_file = "./src/days/day24_input"
 //   let assert Ok(day24_input) = simplifile.read(day24_input_file)
 //   show_result(day24.solution(day24_input))
